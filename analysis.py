@@ -67,19 +67,21 @@ def load_sentiment_model():
         st.error(f"Nie udało się wczytać modelu sentymentu '{model_name}': {e}")
         raise
 
+    # Jeżeli nie ma GPU to używamy CPU
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
     # Pobierz id2label z konfiguracji (gdy dostępne)
+    # Dla clapAI/modernBERT-large-multilingual-sentiment jest to:
+    # "id2label": { "0": "negative", "1": "neutral", "2": "positive" }
     id2label = {}
     try:
         id2label = {int(k): v for k, v in model.config.id2label.items()}
     except Exception:
-        # fallback: jeżeli nie ma id2label, zbuduj domyślne
-        # (np. dla modeli 3-klasowych)
-        id2label = {0: "LABEL_0", 1: "LABEL_1", 2: "LABEL_2"}
+        # fallback: jeżeli nie ma id2label, zbuduj domyślne (np. dla modelu 3-klasowego)
+        id2label = {0: "neg", 1: "neu", 2: "pos"}
 
-    # Mapowanie etykiet oryginalnych -> polskie (najlepiej heurystycznie)
+    # Mapowanie etykiet oryginalnych -> polskie
     labels_map = {}
     for idx, label in id2label.items():
         ll = label.lower()
@@ -90,7 +92,7 @@ def load_sentiment_model():
         elif "neu" in ll or "neutral" in ll:
             labels_map[label] = "neutralny"
         else:
-            # pozostaw oryginalną etykietę (do dalszego mapowania w analizie)
+            # Zostawiamy oryginalną etykietę (do dalszego mapowania w analizie)
             labels_map[label] = label
 
     return tokenizer, model, id2label, labels_map, device
@@ -126,8 +128,10 @@ def load_emotion_model(language: str = "english"):
         st.error(f"Nie udało się wczytać modelu emocji '{model_name}': {e}")
         raise
 
+    # Jeżeli nie ma GPU to używamy CPU
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
+    
     return tokenizer, model, labels, device, label_mapping
 
 def _softmax(logits: np.ndarray) -> np.ndarray:
@@ -140,7 +144,6 @@ def analyze_texts(reviews: List[Dict], tokenizer, model, labels: Any, device,
     Analiza tekstów:
      - 'labels' może być słownikiem id->label (sentyment) lub listą etykiet (emocje)
      - Zwraca: (wyniki_lista, caly_tekst_concat)
-    Bezpiecznie opakowano inferencję w try/except.
     """
     wyniki, caly_tekst = [], ""
     batch_size = 8
@@ -173,9 +176,9 @@ def analyze_texts(reviews: List[Dict], tokenizer, model, labels: Any, device,
                 logits = outputs.logits.cpu().numpy()
                 probs = _softmax(logits)
         except Exception as e:
-            # Loguj i ustaw pewne defaulty — nie przerywaj całej aplikacji
+            # Jeżeli wystąpi błąd to nie przerywamy całej aplikacji
             st.error(f"Błąd podczas inferencji modelu: {e}")
-            # fallback: dla każdego tekstu daj etykietę neutralną z niską pewnością
+            # Fallback: dla każdego tekstu daj etykietę neutralną z niską pewnością
             for r_obj in batch_reviews:
                 txt = r_obj.get("review", "")
                 if not txt.strip():
@@ -206,14 +209,14 @@ def analyze_texts(reviews: List[Dict], tokenizer, model, labels: Any, device,
 
             idx = int(np.argmax(p))
 
-            # Domyślne score
+            # Domyślny sentyment
             sentyment_score = 0.5
 
-            # Pobierz etykietę modelu
+            # Pobieramy etykietę modelu
             if is_sentiment_model:
                 # labels: dict id->label
                 etykieta_raw = labels.get(idx, f"LABEL_{idx}")
-                # Zastosuj mapowanie do polskich etykiet jeśli dostępne
+                # Stosujemy mapowanie do polskich etykiet jeśli dostępne
                 if label_mapping:
                     etykieta = label_mapping.get(etykieta_raw, etykieta_raw)
                 else:
@@ -226,9 +229,9 @@ def analyze_texts(reviews: List[Dict], tokenizer, model, labels: Any, device,
                 else:
                     etykieta = etykieta_raw
 
-            # Oblicz sentyment_score
+            # Obliczamy sentyment_score
             if is_sentiment_model:
-                # Spróbuj odnaleźć indeks klasy pozytywnej w model.config.id2label
+                # Próbujemy odnaleźć indeks klasy pozytywnej w model.config.id2label
                 positive_idx = None
                 try:
                     id2label = model.config.id2label
@@ -242,7 +245,7 @@ def analyze_texts(reviews: List[Dict], tokenizer, model, labels: Any, device,
                 if positive_idx is not None and positive_idx < len(p):
                     sentyment_score = float(p[positive_idx])
                 else:
-                    # Fallback: przypisz ważoną sumę z heurystycznymi wartościami
+                    # Fallback: przypisz ważoną sumę z domyślnymi wartościami
                     if len(p) == 3:
                         sent_scores = [0.2, 0.5, 0.8]
                     else:
