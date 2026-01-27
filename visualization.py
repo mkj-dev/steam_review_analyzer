@@ -7,15 +7,14 @@ from typing import Dict, Any
 
 def build_plotly_sentiment_bar(df: pd.DataFrame):
     if "sentyment_label" in df.columns and not df["sentyment_label"].empty:
-        # Zmieniona kolejność: pozytywny, neutralny, negatywny (od lewej do prawej)
         counts = df["sentyment_label"].value_counts().reindex(["pozytywny", "neutralny", "negatywny"]).fillna(0)
-        # Sprawdź czy są jakieś dane do wyświetlenia
+        # Sprawdzamy, czy są jakieś dane do wyświetlenia
         if counts.sum() > 0:
             # Mapowanie kolorów dla każdego sentymentu
             color_map = {
-                "pozytywny": "#2ecc71",  # Naturalny zielony
-                "neutralny": "#3498db",  # Naturalny niebieski
-                "negatywny": "#e74c3c"    # Naturalny czerwony
+                "pozytywny": "#2ecc71",  # Zielony
+                "neutralny": "#3498db",  # Niebieski
+                "negatywny": "#e74c3c"    # Czerwony
             }
             
             # Tworzymy wykres używając go.Figure dla lepszej kontroli
@@ -37,12 +36,12 @@ def build_plotly_sentiment_bar(df: pd.DataFrame):
                 xaxis=dict(categoryorder="array", categoryarray=["pozytywny", "neutralny", "negatywny"])
             )
         else:
-            # Pusty wykres jeśli brak danych
+            # Pusty wykres jeśli wystąpi brak danych
             fig = go.Figure()
             fig.add_annotation(text="Brak danych do wyświetlenia", xref="paper", yref="paper", x=0.5, y=0.5, showarrow=False)
             fig.update_layout(title="Rozkład sentymentu", margin=dict(l=10, r=10, t=40, b=10))
     else:
-        # Fallback dla nieoczekiwanej struktury danych
+        # Dodatkowy kod dla nieoczekiwanej struktury danych
         fig = go.Figure()
         fig.add_annotation(text="Brak kolumny 'sentyment_label' w danych", xref="paper", yref="paper", x=0.5, y=0.5, showarrow=False)
         fig.update_layout(title="Rozkład sentymentu", margin=dict(l=10, r=10, t=40, b=10))
@@ -144,7 +143,7 @@ def build_sentiment_emotion_correlation(df: pd.DataFrame) -> go.Figure:
         fig.update_layout(title="Korelacja sentymentu i emocji", margin=dict(l=10, r=10, t=40, b=10))
         return fig
 
-    # Oblicz współczynnik korelacji Pearsona
+    # Obliczamy współczynnik korelacji Pearsona
     try:
         correlation = tmp["sentyment_score"].corr(tmp["emocja_score"])
         corr_text = f" (korelacja: {correlation:.2f})" if not pd.isna(correlation) else ""
@@ -168,7 +167,7 @@ def build_steam_vs_model_comparison(df: pd.DataFrame) -> go.Figure:
         fig.update_layout(title="Porównanie: Ocena Steam vs. Sentyment modelu", margin=dict(l=10, r=10, t=40, b=10))
         return fig
 
-    # Usuń wiersze z brakującymi wartościami
+    # Usuwamy wiersze z brakującymi wartościami
     df_clean = df.dropna(subset=["voted_up", "sentyment_polar"])
     
     if df_clean.empty:
@@ -197,7 +196,7 @@ def build_steam_vs_model_comparison(df: pd.DataFrame) -> go.Figure:
         comparison = comparison.reindex([True, False], fill_value=0)
         comparison = comparison.reindex(columns=["negatywny", "neutralny", "pozytywny"], fill_value=0)
 
-    # Tworzymy dane do wykresu - bezpieczny dostęp z wartościami domyślnymi
+    # Tworzymy dane do wykresu
     categories = ["Steam Pozytywna", "Steam Negatywna"]
     neg_values = (comparison.loc[True, "negatywny"] if True in comparison.index else 0,
                   comparison.loc[False, "negatywny"] if False in comparison.index else 0)
@@ -208,34 +207,34 @@ def build_steam_vs_model_comparison(df: pd.DataFrame) -> go.Figure:
 
     fig = go.Figure()
     
-    # Negatywny - naturalny czerwony
+    # Negatywny - czerwony
     fig.add_trace(go.Bar(
         name="Negatywny",
         x=categories,
         y=neg_values,
-        marker_color="#e74c3c",  # Naturalny czerwony
+        marker_color="#e74c3c",
         text=neg_values,
         textposition='auto',
         hovertemplate="<b>Model Negatywny</b><br>%{x}<br>Liczba recenzji: %{y}<extra></extra>"
     ))
     
-    # Neutralny - naturalny niebieski
+    # Neutralny - niebieski
     fig.add_trace(go.Bar(
         name="Neutralny",
         x=categories,
         y=neu_values,
-        marker_color="#3498db",  # Naturalny niebieski
+        marker_color="#3498db",
         text=neu_values,
         textposition='auto',
         hovertemplate="<b>Model Neutralny</b><br>%{x}<br>Liczba recenzji: %{y}<extra></extra>"
     ))
     
-    # Pozytywny - naturalny zielony
+    # Pozytywny - zielony
     fig.add_trace(go.Bar(
         name="Pozytywny",
         x=categories,
         y=pos_values,
-        marker_color="#2ecc71",  # Naturalny zielony
+        marker_color="#2ecc71",
         text=pos_values,
         textposition='auto',
         hovertemplate="<b>Model Pozytywny</b><br>%{x}<br>Liczba recenzji: %{y}<extra></extra>"
