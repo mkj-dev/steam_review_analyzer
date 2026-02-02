@@ -45,7 +45,10 @@ GAMING_ASPECTS = {
 
 @st.cache_resource
 def load_spacy_model(language: str = "english"):
-    """Cache'owany model spaCy - zwraca None jeśli model nie jest zainstalowany"""
+    """
+    Ładuje model spaCy.
+    Zwraca: None, jeśli model nie jest zainstalowany.
+    """
     try:
         model_name = "pl_core_news_sm" if language == "polish" else "en_core_web_sm"
         return spacy.load(model_name)
@@ -56,8 +59,8 @@ def load_spacy_model(language: str = "english"):
 @st.cache_resource
 def load_sentiment_model():
     """
-    Ładuje model sentymentu i zwraca:
-     (tokenizer, model, id2label_dict, labels_map_to_polish, device)
+    Ładuje model sentymentu.
+    Zwraca: tokenizer, model, id2label, labels_map, device.
     """
     model_name = "clapAI/roberta-large-multilingual-sentiment"
     try:
@@ -101,7 +104,7 @@ def load_sentiment_model():
 def load_emotion_model(language: str = "english"):
     """
     Ładuje model emocji w zależności od języka.
-    Zwraca: tokenizer, model, labels_list, device, label_mapping_to_polish (opcjonalnie)
+    Zwraca: tokenizer, model, labels, device, label_mapping.
     """
     if language == "polish":
         model_name = "visegradmedia-emotion/Emotion_RoBERTa_pooled_V4"
@@ -141,9 +144,8 @@ def _softmax(logits: np.ndarray) -> np.ndarray:
 def analyze_texts(reviews: List[Dict], tokenizer, model, labels: Any, device,
                   label_mapping: Optional[Dict] = None) -> Tuple[List[Dict], str]:
     """
-    Analiza tekstów:
-     - 'labels' może być słownikiem id->label (sentyment) lub listą etykiet (emocje)
-     - Zwraca: (wyniki_lista, caly_tekst_concat)
+    Analiza tekstów.
+    Zwraca: wyniki, caly_tekst.
     """
     wyniki, caly_tekst = [], ""
     batch_size = 8
@@ -282,7 +284,7 @@ def analyze_texts(reviews: List[Dict], tokenizer, model, labels: Any, device,
 def analyze_aspects(reviews: List[Dict], language: str = "english") -> Dict[str, Dict]:
     """
     Analiza aspektów z wykorzystaniem spaCy (jeśli dostępny).
-    Zwraca słownik aspekt -> metryki.
+    Zwraca: results (słownik aspekt -> metryki).
     """
     lang_code = "pl" if language == "polish" else "en"
     nlp = load_spacy_model(language)
