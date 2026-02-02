@@ -37,7 +37,6 @@ def fetch_reviews_page(app_id: str, cursor: str, language: str, session: request
     session: opcjonalna sesja do ponownego użycia połączeń HTTP.
     Funkcja nie jest cache'owana, ponieważ jest wywoływana z cache'owanej funkcji fetch_reviews.
     """
-    # Poprawione łączenie stringa URL (bez złamania f-string)
     base_url = (
         f"https://store.steampowered.com/appreviews/{app_id}"
         f"?json=1&language={language}&filter=recent&purchase_type=all"
@@ -81,7 +80,6 @@ def fetch_reviews_page(app_id: str, cursor: str, language: str, session: request
 def fetch_reviews(app_id: str, number_of_reviews: int, language: str) -> List[Dict]:
     """
     Pobiera recenzje dla app_id, zwracając listę słowników z oczyszczonymi metadanymi.
-    Zoptymalizowane z ponownym użyciem sesji HTTP i zmniejszonymi opóźnieniami.
     """
     if not app_id:
         return []
@@ -89,7 +87,7 @@ def fetch_reviews(app_id: str, number_of_reviews: int, language: str) -> List[Di
     all_reviews, cursor, fetched = [], "*", 0
     target = min(number_of_reviews, 1000)
     
-    # Reuse session across all requests for better performance
+    # Ponowne wykorzystanie sesji we wszystkich żądaniach w celu uzyskania lepszej wydajności
     session = requests.Session()
     
     try:
@@ -103,7 +101,7 @@ def fetch_reviews(app_id: str, number_of_reviews: int, language: str) -> List[Di
             for r in reviews:
                 ts = r.get("timestamp_created")
                 if not ts:
-                    # pomiń recenzje bez timestampu
+                    # Pomiń recenzje bez timestampu
                     continue
 
                 # Parsowanie typu zakupu
@@ -114,7 +112,7 @@ def fetch_reviews(app_id: str, number_of_reviews: int, language: str) -> List[Di
                 author_dict = r.get("author", {}) or {}
                 author_info = {}
                 if isinstance(author_dict, dict):
-                    # Konwertuj czas gry z minut na godziny (1 decimal)
+                    # Konwertuj czas gry z minut na godziny
                     try:
                         playtime_at_review_hours = round(int(author_dict.get("playtime_at_review", 0)) / 60, 1)
                         playtime_forever_hours = round(int(author_dict.get("playtime_forever", 0)) / 60, 1)
@@ -130,7 +128,7 @@ def fetch_reviews(app_id: str, number_of_reviews: int, language: str) -> List[Di
                         "playtime_forever_hours": playtime_forever_hours
                     }
 
-                # Dodaj recenzję z pełnymi metadanymi
+                # Dodajemy recenzję z pełnymi metadanymi
                 try:
                     weighted = float(r.get("weighted_vote_score", 0) or 0)
                 except Exception:
@@ -156,9 +154,6 @@ def fetch_reviews(app_id: str, number_of_reviews: int, language: str) -> List[Di
             cursor = data.get("cursor") if isinstance(data, dict) else None
             if not cursor or len(reviews) < 100:
                 break
-
-            # Zmniejszone opóźnienie - Steam API zwykle toleruje 0.05-0.1s
-            # Dla większych batchy używamy mniejszego opóźnienia
             time.sleep(0.05)
     finally:
         session.close()
