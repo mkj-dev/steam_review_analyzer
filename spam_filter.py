@@ -9,10 +9,10 @@ CURSE_WORDS = {
 
 def is_spam_review(review: Dict, language: str = "english") -> bool:
     """
-    Sprawdza czy recenzja jest spamem lub niskiej jakości.
+    Zwraca True, jeżeli recenzja wygląda na spam.
     
     Kryteria:
-    - Zbyt krótka (< 10 znaków)
+    - zbyt krótka (< 10 znaków)
     - Tylko wulgaryzmy
     - Tylko losowe znaki/cyfry
     - Brak sensownych słów
@@ -23,13 +23,14 @@ def is_spam_review(review: Dict, language: str = "english") -> bool:
     if len(text) < 10:
         return True
     
-    # Sprawdź czy zawiera tylko wulgaryzmy
+    # Sprawdzamy czy zawiera tylko wulgaryzmy
     lang_code = "pl" if language == "polish" else "en"
     curse_list = CURSE_WORDS.get(lang_code, [])
     
     text_lower = text.lower()
-    words = re.findall(r'\b\w+\b', text_lower)
-    
+    words = re.findall(r'\b\w+\b', text_lower) # wyciąga wszystkie słowa (ciągi znaków alfanumerycznych)
+
+    # Nie znaleziono żadnych słów
     if not words:
         return True
     
@@ -38,7 +39,7 @@ def is_spam_review(review: Dict, language: str = "english") -> bool:
     if len(meaningful_words) == 0 and len(words) > 0:
         return True
     
-    # Sprawdź czy to tylko losowe znaki/cyfry (więcej niż 50% to cyfry lub znaki specjalne)
+    # Sprawdź czy to tylko losowe znaki/cyfry
     alphanumeric = re.findall(r'[a-zA-Z]', text)
     if len(alphanumeric) < len(text) * 0.3:  # Mniej niż 30% to litery
         return True
@@ -52,7 +53,7 @@ def is_spam_review(review: Dict, language: str = "english") -> bool:
 def filter_spam_reviews(reviews: List[Dict], language: str = "english") -> tuple[List[Dict], List[Dict]]:
     """
     Filtruje recenzje na normalne i spam.
-    Zwraca: (normalne_recenzje, spam_recenzje)
+    Zwraca: normal_reviews, spam_reviews
     """
     normal_reviews = []
     spam_reviews = []
