@@ -25,7 +25,7 @@ W aplikacji wykorzystano trzy modele:
 **Bez zainstalowania modeli spaCy, aplikacja będzie działać, ale lematyzacja i analiza aspektów będą ograniczone.**
 
 ## Pierwsze uruchomienie
-```streamlit run app.py``` lub ```streamlit -m run app.py```
+```streamlit run app.py``` lub ```python -m streamlit run app.py```
 
 ## Uwaga
 Przy pierwszym uruchomieniu aplikacja automatycznie pobierze modele z Hugging Face:
