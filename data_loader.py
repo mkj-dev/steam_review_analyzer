@@ -6,6 +6,10 @@ from urllib.parse import quote_plus
 
 @st.cache_data
 def search_game_by_title(title: str) -> List[Dict[str, str]]:
+    """
+    Przyjmuje parametr "title" (tytuł gry).
+    Zwraca: listę słowników z polami "name" (nazwa gry) i "appid" (ID gry).
+    """
     if not title:
         return []
     url_title = quote_plus(title)
