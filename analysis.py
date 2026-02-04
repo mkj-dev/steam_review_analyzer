@@ -360,7 +360,7 @@ def summarize_reviews(merged: List[Dict], top_n: int = 5, lang: str = "english")
             return lemmed
         return texts
 
-    stop_words = "english" if lang == "english" else {"i", "w", "na", "nie", "że", "to", "się", "z", "do", "o", "po", "dla", "jest", "jak", "ale", "co", "czy", "od", "za"}
+    stop_words = "english" if lang == "english" else ["i", "w", "na", "nie", "że", "to", "się", "z", "do", "o", "po", "dla", "jest", "jak", "ale", "co", "czy", "od", "za"]
     summaries = {"positive": [], "negative": []}
 
     try:
