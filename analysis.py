@@ -7,6 +7,13 @@ from sklearn.feature_extraction.text import CountVectorizer
 from collections import defaultdict
 import spacy
 
+# Testowanie dostępności GPU
+print(torch.__version__)
+print(torch.version.cuda)
+print(torch.cuda.is_available())
+print(torch.cuda.device_count())
+print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else "No GPU detected")
+
 # ------------- ASPEKTY GAMINGOWE – DWUJĘZYCZNE -------------
 GAMING_ASPECTS = {
     "gameplay": {
@@ -73,6 +80,7 @@ def load_sentiment_model():
     # Jeżeli nie ma GPU to używamy CPU
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
+    print(f"Załadowano model sentymentu '{model_name}' na urządzenie {device}.")
 
     # Pobierz id2label z konfiguracji (gdy dostępne)
     # Dla clapAI/modernBERT-large-multilingual-sentiment jest to:
@@ -134,7 +142,8 @@ def load_emotion_model(language: str = "english"):
     # Jeżeli nie ma GPU to używamy CPU
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
-    
+    print(f"Załadowano model emocji '{model_name}' na urządzenie {device}.")
+
     return tokenizer, model, labels, device, label_mapping
 
 def _softmax(logits: np.ndarray) -> np.ndarray:
