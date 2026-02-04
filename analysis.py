@@ -365,7 +365,7 @@ def summarize_reviews(merged: List[Dict], top_n: int = 5, lang: str = "english")
 
     try:
         if texts_pos:
-            vec = CountVectorizer(ngram_range=(1, 2), stop_words=stop_words, max_features=1000)
+            vec = CountVectorizer(ngram_range=(2, 3), stop_words=stop_words, max_features=1000)
             X = vec.fit_transform(lemmatize_batch(texts_pos))
             freqs = X.sum(axis=0).A1
             phrases = vec.get_feature_names_out()
@@ -373,7 +373,7 @@ def summarize_reviews(merged: List[Dict], top_n: int = 5, lang: str = "english")
             summaries["positive"] = [(p, int(c)) for p, c in top]
 
         if texts_neg:
-            vec = CountVectorizer(ngram_range=(1, 2), stop_words=stop_words, max_features=1000)
+            vec = CountVectorizer(ngram_range=(2, 3), stop_words=stop_words, max_features=1000)
             X = vec.fit_transform(lemmatize_batch(texts_neg))
             freqs = X.sum(axis=0).A1
             phrases = vec.get_feature_names_out()
