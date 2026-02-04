@@ -36,6 +36,7 @@ SENTIMENT_MODEL_NAME = "clapAI/roberta-large-multilingual-sentiment"
 EMOTION_MODEL_PL_NAME = "visegradmedia-emotion/Emotion_RoBERTa_pooled_V4"
 EMOTION_MODEL_EN_NAME = "j-hartmann/emotion-english-distilroberta-base"
 
+# Funkcja służąca do automatycznego generowania nazw dla plików CSV/JSON
 def _experiment_meta(config: Dict) -> Dict:
     cfg_str = json.dumps(config, sort_keys=True)
     h = hashlib.sha256(cfg_str.encode()).hexdigest()[:12]
