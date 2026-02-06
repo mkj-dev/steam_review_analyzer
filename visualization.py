@@ -127,38 +127,6 @@ def build_sentiment_trend(df: pd.DataFrame) -> go.Figure:
 
     return fig
 
-def build_sentiment_emotion_correlation(df: pd.DataFrame) -> go.Figure:
-    """Wykres punktowy korelacji sentymentu i emocji"""
-    if "sentyment_score" not in df.columns or "emocja_score" not in df.columns:
-        fig = go.Figure()
-        fig.add_annotation(text="Brak wymaganych kolumn w danych", xref="paper", yref="paper", x=0.5, y=0.5, showarrow=False)
-        fig.update_layout(title="Korelacja sentymentu i emocji", margin=dict(l=10, r=10, t=40, b=10))
-        return fig
-
-    tmp = df.dropna(subset=["sentyment_score", "emocja_score", "emocja_label"])
-
-    if tmp.empty:
-        fig = go.Figure()
-        fig.add_annotation(text="Brak danych do wyświetlenia", xref="paper", yref="paper", x=0.5, y=0.5, showarrow=False)
-        fig.update_layout(title="Korelacja sentymentu i emocji", margin=dict(l=10, r=10, t=40, b=10))
-        return fig
-
-    # Obliczamy współczynnik korelacji Pearsona
-    try:
-        correlation = tmp["sentyment_score"].corr(tmp["emocja_score"])
-        corr_text = f" (korelacja: {correlation:.2f})" if not pd.isna(correlation) else ""
-    except Exception:
-        corr_text = ""
-
-    fig = px.scatter(tmp, x="sentyment_score", y="emocja_score", color="emocja_label",
-                     title=f"Korelacja sentymentu i emocji{corr_text}",
-                     labels={"sentyment_score": "Score sentymentu", "emocja_score": "Score emocji"},
-                     color_discrete_sequence=px.colors.qualitative.Set2,
-                     hover_data=["emocja_label"])
-
-    fig.update_layout(margin=dict(l=10, r=10, t=40, b=10))
-    return fig
-
 def build_steam_vs_model_comparison(df: pd.DataFrame) -> go.Figure:
     """Wykres słupkowy: ocena Steam (voted_up) vs. sentyment modelu"""
     if "voted_up" not in df.columns or "sentyment_polar" not in df.columns:

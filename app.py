@@ -15,7 +15,6 @@ from visualization import (
     build_plotly_sentiment_bar,
     build_plotly_emotion_bar,
     build_sentiment_trend,
-    build_sentiment_emotion_correlation,
     build_wordcloud_figure,
     build_nps_gauge,
     build_steam_vs_model_comparison,
@@ -273,11 +272,6 @@ if "merged" in locals():
     st.markdown("### Trend sentymentu w czasie")
     st.info("Pokazuje, jak zmieniał się sentyment w czasie")
     st.plotly_chart(build_sentiment_trend(df_table), use_container_width=True, key="sentiment_trend")
-
-    # Korelacja sentyment-emocja
-    st.markdown("### Korelacja sentymentu i emocji")
-    st.info("Pokazuje, jak emocje korelują z sentymentem")
-    st.plotly_chart(build_sentiment_emotion_correlation(df_table), use_container_width=True, key="sentiment_emotion_corr")
 
     # Wykres aspektów (jeśli dostępne)
     if 'aspects' in locals() and aspects:
