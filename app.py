@@ -419,4 +419,4 @@ if "merged" in locals():
         st.download_button("Pobierz JSON", data=json.dumps(json_data, ensure_ascii=False, indent=2),
                            file_name=f"steam_{meta['run_id']}.json", mime="application/json", use_container_width=True)
 else:
-    st.info("Wprowadź tytuł gry, ustaw parametry i kliknij 'Analizuj', aby przeprowadzić analizę.")
+    st.info("Wprowadź tytuł gry, ustaw parametry i kliknij 'Analizuj recenzje (sentyment + emocje)', aby przeprowadzić analizę.")
