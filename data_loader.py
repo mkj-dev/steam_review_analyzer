@@ -48,7 +48,7 @@ def fetch_reviews_page(app_id: str, cursor: str, language: str, session: request
     url = f"{base_url}&num_per_page=100&cursor={quote_plus(cursor)}"
     max_attempts, backoff = 3, 1.0
 
-    # Użyj istniejącej sesji lub utwórz nową
+    # Używa istniejącej sesji lub tworzy nową
     if session is None:
         session = requests.Session()
         close_session = True
@@ -105,18 +105,18 @@ def fetch_reviews(app_id: str, number_of_reviews: int, language: str) -> List[Di
             for r in reviews:
                 ts = r.get("timestamp_created")
                 if not ts:
-                    # Pomiń recenzje bez timestampu
+                    # Pomija recenzje bez timestampu
                     continue
 
                 # Parsowanie typu zakupu
                 steam_purchase = r.get("steam_purchase", True)
                 purchase_type = "steam" if steam_purchase else "key"
 
-                # Pobierz pełne dane autora
+                # Pobiera pełne dane autora
                 author_dict = r.get("author", {}) or {}
                 author_info = {}
                 if isinstance(author_dict, dict):
-                    # Konwertuj czas gry z minut na godziny
+                    # Konwertuje czas gry z minut na godziny
                     try:
                         playtime_at_review_hours = round(int(author_dict.get("playtime_at_review", 0)) / 60, 1)
                         playtime_forever_hours = round(int(author_dict.get("playtime_forever", 0)) / 60, 1)
