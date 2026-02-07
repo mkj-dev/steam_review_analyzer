@@ -82,7 +82,7 @@ def load_sentiment_model():
     model.to(device)
     print(f"Załadowano model sentymentu '{model_name}' na urządzenie {device}.")
 
-    # Pobierz id2label z konfiguracji (gdy dostępne)
+    # Pobiera id2label z konfiguracji (gdy dostępne)
     # Dla clapAI/modernBERT-large-multilingual-sentiment jest to:
     # "id2label": { "0": "negative", "1": "neutral", "2": "positive" }
     id2label = {}
@@ -159,7 +159,7 @@ def analyze_texts(reviews: List[Dict], tokenizer, model, labels: Any, device,
     wyniki, caly_tekst = [], ""
     batch_size = 8
 
-    # Rozpoznaj typ modelu
+    # Rozpoznaje typ modelu
     is_sentiment_model = isinstance(labels, dict) and len(labels) in (2, 3, 5)
 
     # Mapowanie polaryzacji
@@ -240,7 +240,7 @@ def analyze_texts(reviews: List[Dict], tokenizer, model, labels: Any, device,
                 else:
                     etykieta = etykieta_raw
 
-            # Obliczamy sentyment_score
+            # Obliczanie sentyment_score
             if is_sentiment_model:
                 # Próbujemy odnaleźć indeks klasy pozytywnej w model.config.id2label
                 positive_idx = None
