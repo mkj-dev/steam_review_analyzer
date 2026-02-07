@@ -293,7 +293,7 @@ if "merged" in locals():
         # Wyświetla przykładowe recenzje dla każdego aspektu
         st.markdown("#### Przykładowe recenzje per aspekt")
         aspect_names = {
-            "gameplay": "Gameplay",
+            "gameplay": "Rozgrywka",
             "graphics": "Grafika",
             "performance": "Wydajność",
             "story": "Fabuła",
