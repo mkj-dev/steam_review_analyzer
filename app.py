@@ -285,12 +285,12 @@ if "merged" in locals():
     st.info("Pokazuje, jak zmieniał się sentyment w czasie")
     st.plotly_chart(build_sentiment_trend(df_table), use_container_width=True, key="sentiment_trend")
 
-    # Wykres aspektów (jeśli dostępne)
+    # Wykres aspektów (jeśli dostępny)
     if 'aspects' in locals() and aspects:
         st.markdown("### Średni sentyment per aspekt (gaming)")
         st.plotly_chart(build_aspect_bar_from_dict(aspects), use_container_width=True, key="aspect_bar")
         
-        # Wyświetl przykładowe recenzje dla każdego aspektu
+        # Wyświetla przykładowe recenzje dla każdego aspektu
         st.markdown("#### Przykładowe recenzje per aspekt")
         aspect_names = {
             "gameplay": "Gameplay",
@@ -303,7 +303,7 @@ if "merged" in locals():
             "monetization": "Monetyzacja"
         }
         
-        # Sortuj aspekty według liczby wzmianek (malejąco)
+        # Sortuje aspekty według liczby wzmianek (malejąco)
         sorted_aspects = sorted(aspects.items(), key=lambda x: x[1].get("mention_count", 0), reverse=True)
         
         for aspect_key, aspect_data in sorted_aspects:
@@ -345,8 +345,8 @@ if "merged" in locals():
 
     # Chmura słów (bez wulgaryzmów)
     st.markdown("### Chmura słów – całość recenzji")
-    # Filtruj wulgaryzmy z tekstu przed tworzeniem word cloud
-    # Użyj języka z merged reviews lub domyślnego
+    # Filtruje wulgaryzmy z tekstu przed tworzeniem word cloud
+    # Używa języka z merged reviews lub domyślnego
     review_language = merged[0].get("language", "english") if merged else "english"
     clean_text_sent = filter_curse_words_from_text(tekst_sent or "", review_language)
     clean_text_emot = filter_curse_words_from_text(tekst_emot or "", review_language)
@@ -359,7 +359,7 @@ if "merged" in locals():
         st.info(f"Znaleziono {len(recenzje_spam)} recenzji, które zostały odfiltrowane jako spam (zbyt krótkie, tylko wulgaryzmy, losowe znaki).")
         spam_df = pd.DataFrame(recenzje_spam)
         if not spam_df.empty:
-            # Przygotuj kolumny do wyświetlenia
+            # Przygotowanie kolumn do wyświetlenia
             spam_display = spam_df.copy()
             if "review" in spam_display.columns:
                 spam_display["tekst"] = spam_display["review"]
@@ -396,7 +396,7 @@ if "merged" in locals():
     st.markdown("### Eksport danych")
     col_csv, col_json = st.columns(2)
     
-    # Przygotuj dane do eksportu - włącz spam recenzje
+    # Przygotowanie danych do eksportu (uwzględnia spam)
     all_reviews_for_export = merged.copy()
     if 'recenzje_spam' in locals() and recenzje_spam:
         # Dodaj flagę is_spam do każdej recenzji
@@ -405,7 +405,7 @@ if "merged" in locals():
         for spam_review in recenzje_spam:
             spam_review_copy = spam_review.copy()
             spam_review_copy["is_spam"] = True
-            # Dodaj brakujące pola dla zgodności
+            # Dodaje brakujące pola dla zgodności
             if "sentyment_label" not in spam_review_copy:
                 spam_review_copy["sentyment_label"] = "N/A"
             if "sentyment_score" not in spam_review_copy:
