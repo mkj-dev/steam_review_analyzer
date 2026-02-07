@@ -36,7 +36,7 @@ def render_sidebar_controls() -> Dict:
     }
 
 def format_author_info(author_data):
-    """Wspólna funkcja formatująca informacje o autorze (DRY)."""
+    """Wspólna funkcja formatująca informacje o autorze."""
     if not isinstance(author_data, dict):
         return str(author_data)
     steamid = author_data.get("steamid", "N/A")
@@ -55,7 +55,7 @@ def prepare_df_for_table(merged_list: List[Dict]) -> pd.DataFrame:
         if col not in df.columns:
             df[col] = None
 
-    # Parsowanie timestamp -> date (bez wyrzucania wyjątku)
+    # Parsowanie timestamp -> date
     def ts_to_date(v):
         try:
             if v and int(v) > 0:
@@ -66,7 +66,7 @@ def prepare_df_for_table(merged_list: List[Dict]) -> pd.DataFrame:
 
     df["date"] = df["timestamp"].apply(ts_to_date)
 
-    # Przygotuj kolumnę autora do wyświetlenia (używamy wspólnej funkcji)
+    # Przygotowanie kolumny autora do wyświetlenia
     if "author" in df.columns:
         df["author_display"] = df["author"].apply(format_author_info)
 
@@ -75,7 +75,7 @@ def prepare_df_for_table(merged_list: List[Dict]) -> pd.DataFrame:
 def render_filters_and_review_list(merged: List[Dict]):
     st.subheader("Filtry recenzji")
 
-    # Wygeneruj DataFrame źródłowy (jeśli pusty — exit)
+    # Wygeneruj źródłowy DataFrame
     if not merged:
         st.info("Brak danych do wyświetlenia.")
         return
@@ -99,7 +99,7 @@ def render_filters_and_review_list(merged: List[Dict]):
     except Exception:
         pass
 
-    # Przygotuj listy wartości filtrów
+    # Przygotowanie listy wartości filtrów
     all_sentiments = sorted(df_all["sentyment_polar"].dropna().unique().tolist())
     all_emotions = sorted(df_all["emocja_label"].dropna().unique().tolist())
     max_helpful = int(df_all["helpful"].fillna(0).astype(int).max()) if "helpful" in df_all.columns else 0
@@ -114,7 +114,7 @@ def render_filters_and_review_list(merged: List[Dict]):
 
     keyword_input = st.text_input("Wyszukaj słowo kluczowe:", "")
 
-    # Filtruj DataFrame używając pandas
+    # Filtrowanie DataFrame używając pandas
     df_filtered = df_all.copy()
 
     if sent_choice != "Wszystkie":
@@ -154,14 +154,14 @@ def render_filters_and_review_list(merged: List[Dict]):
         except Exception:
             pass
 
-    # Dodaj kolumnę czasu gry i autora
+    # Dodaje kolumnę czasu gry i autora
     if "author" in df_display.columns:
         df_display["playtime_at_review_hours"] = df_display["author"].apply(
             lambda x: x.get("playtime_at_review_hours", 0) if isinstance(x, dict) else 0
         )
         df_display["author_display"] = df_display["author"].apply(lambda x: format_author_info(x) if isinstance(x, dict) else str(x))
 
-    # Przygotuj i pokaż tabelę z konfiguracją kolumn
+    # Przygotowuje i wyświetla tabelę z konfiguracją kolumn
     st.dataframe(
         df_display.rename(columns={
             "tekst": "recenzja",
