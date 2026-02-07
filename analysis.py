@@ -146,6 +146,8 @@ def load_emotion_model(language: str = "english"):
 
     return tokenizer, model, labels, device, label_mapping
 
+# Normalizacja prawdopodobieństwa
+# Konwertuje surowe wyniki modelu (logits) na prawdopodobieństwa sumujące się do 1
 def _softmax(logits: np.ndarray) -> np.ndarray:
     exps = np.exp(logits - np.max(logits, axis=1, keepdims=True))
     return exps / np.sum(exps, axis=1, keepdims=True)
