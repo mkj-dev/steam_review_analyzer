@@ -43,11 +43,14 @@ def _experiment_meta(config: Dict) -> Dict:
 
 def calculate_nps(reviews: List[Dict]) -> Dict[str, int]:
     """
-    Net Promoter Score (NPS).
-    NPS = (Promoters% - Detractors%) * 100
-    Promoters: sentiment_score > 0.7 (ekwiwalent 7/10) lub emocja "radość"
-    Detractors: sentiment_score < 0.5 (ekwiwalent 5/10) lub emocja "złość"/"smutek"
-    Passives: pozostałe (nie są uwzględniane w obliczeniach)
+    Oblicza Net Promoter Score (NPS) = (Promoters - Detractors) / Total * 100.
+    
+    Klasyfikacja (priorytet: Detractors > Promoters > Passives):
+    - Promoters: sentyment > 0.7 lub emocja "radość"
+    - Detractors: sentyment < 0.5 lub emocja "złość"/"smutek"
+    - Passives: pozostali (pomijani w NPS)
+    
+    Wynik: od -100 (sami krytycy) do +100 (sami promotorzy).
     """
     promoters_set = set()
     detractors_set = set()
@@ -58,19 +61,24 @@ def calculate_nps(reviews: List[Dict]) -> Dict[str, int]:
         sentiment_score = r.get("sentyment_score", 0.5)
         emotion_label = r.get("emocja_label", "")
         
-        # Sprawdź najpierw detractors (wyższy priorytet)
+        # Sprawdź czy recenzja jest negatywna
         if sentiment_score < 0.5 or emotion_label in ["złość", "smutek"]:
             detractors_set.add(review_id)
-        # Jeśli nie jest detractor, sprawdź promoters
+        # Jeśli nie negatywna, sprawdź czy pozytywna
         elif sentiment_score > 0.7 or emotion_label == "radość":
             promoters_set.add(review_id)
     
     promoters = len(promoters_set)
     detractors = len(detractors_set)
     total = len(reviews)
+    
     # Standardowa formuła NPS: (promoters - detractors) / total * 100
+    # -100 (sami krytycy) do +100 (sami promotorzy)
     nps_score = ((promoters - detractors) / total * 100) if total else 0
-    passives = max(0, total - promoters - detractors)  # Upewnij się, że nie jest ujemne
+
+    # Passives = reszta, z zabezpieczeniem przed ujemną wartością
+    passives = max(0, total - promoters - detractors)
+    
     return {
         "nps_score": round(nps_score, 1), 
         "promoters": promoters, 
