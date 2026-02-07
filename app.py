@@ -61,10 +61,10 @@ def calculate_nps(reviews: List[Dict]) -> Dict[str, int]:
         sentiment_score = r.get("sentyment_score", 0.5)
         emotion_label = r.get("emocja_label", "")
         
-        # Sprawdź czy recenzja jest negatywna
+        # Sprawdza czy recenzja jest negatywna
         if sentiment_score < 0.5 or emotion_label in ["złość", "smutek"]:
             detractors_set.add(review_id)
-        # Jeśli nie negatywna, sprawdź czy pozytywna
+        # Jeśli nie negatywna, sprawdza czy pozytywna
         elif sentiment_score > 0.7 or emotion_label == "radość":
             promoters_set.add(review_id)
     
@@ -89,10 +89,11 @@ def calculate_nps(reviews: List[Dict]) -> Dict[str, int]:
 
 settings: Dict = render_sidebar_controls()
 
-# Klucz unikalny dla sesji - automatycznie generowana nazwa
+# Klucz unikalny dla sesji - automatycznie generowana nazwa w interfejsie
 emotion_model_id = "visegrad" if settings.get("selected_language") == "polish" else "hartmann"
 emotion_model_name = EMOTION_MODEL_PL_NAME if settings.get("selected_language") == "polish" else EMOTION_MODEL_EN_NAME
 
+# Klucz cache'ujący wyniki w session_state (unika ponownego przetwarzania tych samych parametrów)
 current_run_key = (
     settings.get("app_id"),
     settings.get("num_reviews"),
@@ -100,7 +101,9 @@ current_run_key = (
     f"sentiment-clapAI-roberta-emotion-{emotion_model_id}"
 )
 
+# Sprawdza czy wyniki są już w pamięci podręcznej
 if "analysis_results" in st.session_state and st.session_state.get("last_run_key") == current_run_key:
+    # przywraca wyniki z pamięci podręcznej
     results = st.session_state["analysis_results"]
     merged = results["merged"]
     recenzje_spam = results.get("spam_reviews", [])
@@ -111,18 +114,19 @@ if "analysis_results" in st.session_state and st.session_state.get("last_run_key
     aspects = results["aspects"]
     nps = results["nps"]
     meta = results["meta"]
+
 elif settings.get("run_button") and settings.get("app_id"):
     start_time = datetime.now()
 
     with st.spinner(f"Pobieranie recenzji, wczytuję modele: {SENTIMENT_MODEL_NAME} oraz {emotion_model_name}"):
         try:
-            # Ładujemy model sentymentu (bezpiecznie)
+            # Ładuje model sentymentu
             tok_sent, model_sent, id2label_sent, labels_map_sent, dev_sent = load_sentiment_model()
 
-            # Ładujemy model emocji
+            # Ładuje model emocji
             tok_emot, model_emot, labels_emot_list, dev_emot, label_mapping_emot = load_emotion_model(settings["selected_language"])
 
-            # Pobieramy recenzje - mierzymy czas pobierania osobno
+            # Pobiera recenzje - mierzy czas pobierania
             download_start = datetime.now()
             recenzje_raw = fetch_reviews(settings["app_id"], settings["num_reviews"], settings["selected_language"])
             download_duration = (datetime.now() - download_start).total_seconds()
@@ -131,7 +135,7 @@ elif settings.get("run_button") and settings.get("app_id"):
                 st.error("Brak recenzji – sprawdź AppID i limity API.")
                 st.stop()
 
-            # Filtruj spam przed analizą
+            # Filtruje spam przed analizą
             recenzje_normalne, recenzje_spam = filter_spam_reviews(recenzje_raw, settings["selected_language"])
             
             if recenzje_spam:
@@ -147,8 +151,8 @@ elif settings.get("run_button") and settings.get("app_id"):
             wyniki_emot, tekst_emot = analyze_texts(recenzje_normalne, tok_emot, model_emot, labels_emot_list, dev_emot, label_mapping_emot)
 
             # Scalanie wyników - dopasowanie po timestamp, aby uniknąć utraty recenzji
-            # Tworzymy słowniki indeksowane po timestamp dla szybszego wyszukiwania
-            # Używamy listy zamiast dict dla recenzji z tym samym timestampem
+            # Tworzy słowniki indeksowane po timestamp dla szybszego wyszukiwania
+            # Używa listy zamiast dict dla recenzji z tym samym timestampem
             sent_dict = {}
             for s in wyniki_sent:
                 ts = s.get("timestamp")
@@ -165,7 +169,7 @@ elif settings.get("run_button") and settings.get("app_id"):
                         emot_dict[ts] = []
                     emot_dict[ts].append(e)
             
-            # Używamy wszystkich unikalnych timestampów z obu list
+            # Używa wszystkich unikalnych timestampów z obu list
             all_timestamps = set(sent_dict.keys()) | set(emot_dict.keys())
             
             # Ostrzeżenie jeśli liczby się nie zgadzają
@@ -243,7 +247,7 @@ elif settings.get("run_button") and settings.get("app_id"):
             st.error(f"Wystąpił błąd podczas analizy: {e}")
             st.stop()
 
-    # Oblicz czas operacji i wyświetl info
+    # Oblicza czas operacji i wyświetl info
     end_time = datetime.now()
     total_duration = (end_time - start_time).total_seconds()
 
