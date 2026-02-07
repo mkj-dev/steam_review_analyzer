@@ -1,8 +1,8 @@
 ﻿streamlit==1.44.1
 pandas==2.2.3
 numpy==2.2.4
-torch==2.6.0 # wersja CPU-Only
-# torch==2.6.0+cu124 Odkomentować, aby pobrać PyTorch w wersji 2.6.0+cu124 (wersja GPU - CUDA 12.4)
+# torch==2.6.0 wersja CPU-Only
+torch==2.6.0+cu124 # PyTorch w wersji 2.6.0+cu124 (wersja GPU - CUDA 12.4)
 transformers==4.51.2
 scikit-learn==1.7.2
 spacy==3.8.11
@@ -10,3 +10,4 @@ requests==2.32.3
 plotly==6.3.1
 matplotlib==3.10.1
 wordcloud==1.9.4
+
