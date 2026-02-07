@@ -291,11 +291,33 @@ def build_aspect_bar_from_dict(aspects: Dict[str, Any]) -> go.Figure:
     if not aspects:
         return go.Figure()
 
-    df = pd.DataFrame.from_dict({k: {"avg_sentiment": v.get("avg_sentiment", 0.5),
-                                     "mention_count": v.get("mention_count", 0)} for k, v in aspects.items()},
-                                orient='index')
+    # Mapowanie kluczy angielskich na polskie nazwy wyświetlane
+    aspect_names_pl = {
+        "gameplay": "Rozgrywka",
+        "graphics": "Grafika",
+        "performance": "Wydajność",
+        "story": "Fabuła",
+        "multiplayer": "Multiplayer",
+        "audio": "Audio",
+        "ui": "Interfejs",
+        "monetization": "Monetyzacja"
+    }
+
+    # Tworzy DataFrame z polskimi nazwami jako indeks
+    data_pl = {}
+    for key, value in aspects.items():
+        pl_name = aspect_names_pl.get(key, key.capitalize())
+        data_pl[pl_name] = {
+            "avg_sentiment": value.get("avg_sentiment", 0.5),
+            "mention_count": value.get("mention_count", 0)
+        }
+
+    df = pd.DataFrame.from_dict(data_pl, orient="index")
+
     if df.empty:
         return go.Figure()
+    
     # Sortuj według liczby wzmianek (malejąco) dla lepszej czytelności
     df = df.sort_values("mention_count", ascending=False)
+
     return build_aspect_bar(df)
