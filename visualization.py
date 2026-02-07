@@ -151,17 +151,15 @@ def build_steam_vs_model_comparison(df: pd.DataFrame) -> go.Figure:
     if comparison.empty:
         comparison = pd.DataFrame(index=[True, False], columns=["negatywny", "neutralny", "pozytywny"]).fillna(0)
     else:
-        if True not in comparison.index:
-            comparison.loc[True] = 0
-        if False not in comparison.index:
-            comparison.loc[False] = 0
-
+        # Dodaje brakujące kolumny
         for col in ["negatywny", "neutralny", "pozytywny"]:
             if col not in comparison.columns:
                 comparison[col] = 0
 
+        # Dodaje brakujące wiersze (voted_up)
+        comparison = comparison.reindex(index=[True, False], fill_value=0)
+
         # Sortujemy
-        comparison = comparison.reindex([True, False], fill_value=0)
         comparison = comparison.reindex(columns=["negatywny", "neutralny", "pozytywny"], fill_value=0)
 
     # Tworzymy dane do wykresu
